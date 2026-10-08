@@ -1,0 +1,123 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/fraunces/standard.css';
+@import '@fontsource-variable/fraunces/standard-italic.css';
+@import '@fontsource-variable/instrument-sans';
+
+/* Design tokens — "sunlit cafe zine" */
+@theme {
+  --color-paper: #f6efe4;
+  --color-cream: #fbf7f0;
+  --color-ink: #2b2118;
+  --color-soy: #6b4f3f;
+  --color-matcha: #5e6b3a;
+  --color-matcha-deep: #475229;
+  --color-matcha-soft: #e4e8d0;
+  --color-persimmon: #c64a24;
+  --color-persimmon-deep: #a63a19;
+  --color-miso: #c99a4b;
+  --color-miso-soft: #f2e3c3;
+  --color-blush: #e9c9b8;
+  --color-line: #e3d6c3;
+
+  --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'Instrument Sans Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 1.25rem;
+  --shadow-card: 0 1px 0 rgb(43 33 24 / 0.04), 0 8px 24px -12px rgb(43 33 24 / 0.25);
+  --shadow-float: 0 12px 32px -8px rgb(43 33 24 / 0.35);
+
+  --animate-rise: rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-shimmer: shimmer 1.6s ease-in-out infinite;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes shimmer {
+    0%,
+    100% {
+      opacity: 0.55;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+}
+
+@layer base {
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    min-height: 100dvh;
+    background-color: var(--color-paper);
+    /* faint paper grain */
+    background-image: radial-gradient(rgb(107 79 63 / 0.06) 1px, transparent 1px);
+    background-size: 5px 5px;
+    line-height: 1.5;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    letter-spacing: -0.01em;
+    line-height: 1.12;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-persimmon);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  button,
+  [role='tab'],
+  a {
+    touch-action: manipulation;
+  }
+  ::selection {
+    background: var(--color-blush);
+  }
+}
+
+@layer utilities {
+  .label-caps {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .hatch {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      rgb(201 154 75 / 0.22) 0 4px,
+      transparent 4px 9px
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
