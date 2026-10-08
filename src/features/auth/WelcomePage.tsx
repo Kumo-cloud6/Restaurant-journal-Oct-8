@@ -38,23 +38,53 @@ function Collage() {
 }
 
 export function WelcomePage() {
-  const { signedIn, signIn } = useAuth()
+  const { signedIn, signIn, signUp } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const from = (location.state as { from?: string } | null)?.from ?? '/'
   const [step, setStep] = useState(0)
   const [tastes, setTastes] = useState<string[]>([])
-  const [email, setEmail] = useState('molly@example.com')
+  const [mode, setMode] = useState<'signin' | 'signup'>('signup')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [displayName, setDisplayName] = useState('')
+  const [handle, setHandle] = useState('')
   const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
 
-  if (signedIn) return <Navigate to="/" replace />
-
-  const from = (location.state as { from?: string } | null)?.from ?? '/'
+  if (signedIn) return <Navigate to={from} replace />
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
     setBusy(true)
-    await signIn(email)
-    navigate(from, { replace: true })
+    setError(null)
+    setNotice(null)
+    try {
+      if (mode === 'signin') {
+        await signIn(email, password)
+        navigate(from, { replace: true })
+      } else {
+        const { needsConfirmation } = await signUp({
+          email,
+          password,
+          display_name: displayName,
+          handle: handle.replace(/^@/, ''),
+        })
+        if (needsConfirmation) {
+          setMode('signin')
+          setNotice('Check your email to confirm your account, then sign in.')
+        } else {
+          navigate(from, { replace: true })
+        }
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Something went wrong. Please try again.',
+      )
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
@@ -115,7 +145,10 @@ export function WelcomePage() {
                 variant="ghost"
                 fullWidth
                 className="mt-2"
-                onClick={() => setStep(2)}
+                onClick={() => {
+                  setMode('signin')
+                  setStep(2)
+                }}
               >
                 I already have an account
               </Button>
@@ -127,7 +160,7 @@ export function WelcomePage() {
               <h1 className="text-4xl font-medium">What are you craving?</h1>
               <p className="mt-3 text-soy">
                 Pick a few. We’re starting with Boston’s Asian restaurants and cafes.
-                (This only tunes your demo feed.)
+                (Taste preferences aren’t saved yet.)
               </p>
               <div className="mt-6 flex flex-wrap gap-2">
                 {TASTES.map((t) => (
@@ -157,12 +190,37 @@ export function WelcomePage() {
 
           {step === 2 && (
             <section className="animate-rise">
-              <h1 className="text-4xl font-medium">Join your circle</h1>
+              <h1 className="text-4xl font-medium">
+                {mode === 'signup' ? 'Join your circle' : 'Welcome back'}
+              </h1>
               <p className="mt-3 text-soy">
-                This is a demo, so there’s no real sign-in. Continue to explore with
-                sample friends and logs.
+                {mode === 'signup'
+                  ? 'Create an account, then add friends by their handle to see where they eat.'
+                  : 'Sign in to pick up where you left off.'}
               </p>
               <form onSubmit={(e) => void submit(e)} className="mt-6 space-y-5">
+                {mode === 'signup' && (
+                  <>
+                    <Input
+                      label="Your name"
+                      autoComplete="name"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      required
+                    />
+                    <Input
+                      label="Handle"
+                      autoComplete="username"
+                      value={handle}
+                      onChange={(e) => setHandle(e.target.value)}
+                      placeholder="mollyeats"
+                      pattern="@?[a-zA-Z0-9._]{3,24}"
+                      title="3–24 letters, numbers, dots or underscores"
+                      hint="Friends find you with this. Letters, numbers, . and _"
+                      required
+                    />
+                  </>
+                )}
                 <Input
                   label="Email"
                   type="email"
@@ -171,15 +229,55 @@ export function WelcomePage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
+                <Input
+                  label="Password"
+                  type="password"
+                  autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  minLength={6}
+                  hint={mode === 'signup' ? 'At least 6 characters.' : undefined}
+                  required
+                />
+                {notice && (
+                  <p
+                    role="status"
+                    className="rounded-2xl bg-matcha-soft p-3 text-sm font-medium text-matcha-deep"
+                  >
+                    {notice}
+                  </p>
+                )}
+                {error && (
+                  <p
+                    role="alert"
+                    className="rounded-2xl bg-blush/60 p-3 text-sm font-medium text-persimmon-deep"
+                  >
+                    {error}
+                  </p>
+                )}
                 <div className="flex gap-3">
                   <Button variant="secondary" type="button" onClick={() => setStep(1)}>
                     Back
                   </Button>
                   <Button type="submit" size="lg" className="flex-1" loading={busy}>
-                    Enter the journal
+                    {mode === 'signup' ? 'Create account' : 'Sign in'}
                   </Button>
                 </div>
               </form>
+              <Button
+                variant="ghost"
+                fullWidth
+                className="mt-3"
+                onClick={() => {
+                  setMode(mode === 'signup' ? 'signin' : 'signup')
+                  setError(null)
+                  setNotice(null)
+                }}
+              >
+                {mode === 'signup'
+                  ? 'I already have an account'
+                  : 'New here? Create an account'}
+              </Button>
             </section>
           )}
         </div>

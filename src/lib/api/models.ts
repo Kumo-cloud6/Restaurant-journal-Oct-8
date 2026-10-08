@@ -72,7 +72,10 @@ export interface PendingRequest {
 
 export interface CircleOverview {
   friends: FriendSummary[]
+  /** Requests other people sent me. */
   pending: PendingRequest[]
+  /** Requests I sent that haven't been accepted yet. */
+  sent: PendingRequest[]
 }
 
 export interface WishlistEntry {

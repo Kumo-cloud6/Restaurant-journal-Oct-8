@@ -8,10 +8,13 @@ import { JournalPage } from '@/features/journal/JournalPage'
 import { DiscoverPage } from '@/features/places/DiscoverPage'
 import { PlaceDetailPage } from '@/features/places/PlaceDetailPage'
 import { ProfilePage } from '@/features/profile/ProfilePage'
+import { isSupabaseConfigured } from '@/lib/api'
 import { NotFoundPage } from './NotFoundPage'
 import { Providers } from './providers'
+import { SetupNotice } from './SetupNotice'
 
 export function App() {
+  if (!isSupabaseConfigured) return <SetupNotice />
   return (
     <Providers>
       <Routes>

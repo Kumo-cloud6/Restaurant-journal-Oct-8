@@ -4,7 +4,14 @@ A mobile-first restaurant discovery and dining journal for food lovers who find 
 
 Initial scope: Boston, Asian restaurants and cafes.
 
-> **Status: front end only.** There is no back end and no Supabase code yet. All data comes from in-memory mocks behind a data access layer, and a page refresh resets anything you add.
+> **Status:** the front end is connected to Supabase (Postgres, Auth, Storage). `parseSocialLink` is still a mock heuristic; real TikTok/Instagram scraping isn't built.
+
+## Set up the back end (once)
+
+1. In your Supabase project, open **SQL Editor → New query**, paste [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql), and run it. It creates the tables, row-level security, a profile-on-sign-up trigger, and the `visit-photos` storage bucket.
+2. Run [`supabase/seed.sql`](supabase/seed.sql) the same way to load the starter Boston places and experience tags.
+3. Copy your **Project URL** and **anon public key** (Project Settings → API) into `.env.local` (see `.env.example`).
+4. Optional, for quick testing: **Authentication → Providers → Email**, turn off "Confirm email" so new accounts can sign in immediately.
 
 ## Run it
 
@@ -23,11 +30,11 @@ npm run dev        # http://localhost:5173
 | `npm run lint`      | ESLint (incl. architecture rule) |
 | `npm run format`    | Prettier                         |
 
-The app opens on a mock onboarding screen. There is no real sign-in — "Enter the journal" signs you in as the sample user (Molly) using a flag in `localStorage`.
+Create an account on the welcome screen, then add friends by handle on the Circle page. A friend's logs only verify places for you once they've accepted your request.
 
 ## Stack
 
-React 19, TypeScript (strict), Vite, React Router, Tailwind CSS v4, TanStack Query, ESLint 9 + Prettier. Fonts (Fraunces and Instrument Sans) are bundled locally. ESLint is on v9 because `eslint-plugin-jsx-a11y` does not support v10 yet.
+React 19, TypeScript (strict), Vite, React Router, Tailwind CSS v4, TanStack Query, Supabase, ESLint 9 + Prettier. Fonts (Fraunces and Instrument Sans) are bundled locally. ESLint is on v9 because `eslint-plugin-jsx-a11y` does not support v10 yet.
 
 ## Screens and routes
 
@@ -56,36 +63,20 @@ src/
   app/          router, providers, app shell
   components/   shared UI (ui/, layout/), PhotoImage, QueryBoundary
   features/     auth, places, add, journal, circle, profile (pages + TanStack Query hooks)
-  lib/api/      data access layer: the ONLY code that touches mock data
-  mocks/        in-memory "database" + seed data (private to lib/api)
-  types/        entity types shaped like relational tables
+  lib/api/      data access layer: the ONLY code that touches Supabase
+  types/        entity types shaped like the database tables
+supabase/       migrations (schema, RLS, storage) and seed data
 ```
 
-Data flows one way: **component → query hook → `src/lib/api/` → mocks**. Components never import `src/mocks/` (ESLint enforces this). See [CLAUDE.md](CLAUDE.md) for conventions.
+Data flows one way: **component → query hook → `src/lib/api/` → Supabase**. Nothing outside `src/lib/api/` may import `@supabase/supabase-js` (ESLint enforces this). See [CLAUDE.md](CLAUDE.md) for conventions.
 
-Entities (`User`, `Place`, `Visit`, `WishlistItem`, `Friendship`, `ExperienceTag`) use `id`, `created_at`, snake_case columns and foreign keys by id, so they map directly to Supabase tables.
+**Privacy** is enforced by row-level security, not the UI: you see your own visits and those of accepted friends; wishlists are private; you can only write rows as yourself.
 
-## Connecting Supabase later
+**How trust works** (computed in `src/lib/api/internal.ts`): _verified_ = you or a friend logged a visit; _hyped_ = buzzing online but nobody you know has logged it; _unlogged_ = no logs and no buzz.
 
-All changes go in `src/lib/api/`:
+## What's still mocked or simple
 
-1. `npm install @supabase/supabase-js`, copy `.env.example` to `.env.local`, and fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
-2. Create `src/lib/api/client.ts` with `createClient(...)`.
-3. Replace each function body with a Supabase query. Keep the signatures and the read models in `models.ts`, which stand in for the joins/views Supabase will do.
-4. Delete `mockRuntime.ts` (fake latency and the failure toggle) and `src/mocks/`.
-
-| API function                                          | Supabase equivalent                                                         |
-| ----------------------------------------------------- | --------------------------------------------------------------------------- |
-| `getPlaces`, `getPlaceById`, `searchPlaces`           | `places` + `visits` / `visit_tags` aggregated (view or RPC)                 |
-| `logVisit`                                            | insert `visits`, `visit_tags`, `visit_companions`; upload photos to Storage |
-| `getWishlist`, `saveToWishlist`, `removeFromWishlist` | `wishlist_items`                                                            |
-| `getJournal`                                          | `visits` filtered by `user_id`                                              |
-| `getCircle`, `getFriendActivity`                      | `friendships` + friends' `visits`                                           |
-| `getCurrentUser`, `signInWithEmail`, `signOut`        | Supabase Auth + `users`                                                     |
-| `parseSocialLink`                                     | an Edge Function that resolves the post                                     |
-
-Mock-only things to replace: photos are downscaled to data URLs in `features/add/imageFile.ts` (nothing is uploaded), and `AuthContext` is a `localStorage` flag.
-
-## Testing error states
-
-On the Profile page, **Developer → Simulate API failure** makes every API call fail, so you can see the error and retry states on each screen.
+- `parseSocialLink` resolves links with a heuristic. Replace it with an Edge Function that reads the post.
+- Reads load a snapshot of everything you can see and build summaries in the browser. Fine for a few hundred places; move to SQL views or RPCs when it grows.
+- Profiles are readable by any signed-in user so friends can be found by handle.
+- Taste preferences on the welcome screen and the Profile toggles aren't saved.

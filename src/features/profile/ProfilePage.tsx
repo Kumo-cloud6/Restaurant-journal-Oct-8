@@ -10,8 +10,6 @@ import { useAuth } from '@/features/auth/AuthContext'
 import { useCurrentUser } from '@/features/auth/hooks'
 import { useCircle } from '@/features/circle/hooks'
 import { useJournal, useWishlist } from '@/features/journal/hooks'
-import { isFailureSimulated, setFailureSimulated } from '@/lib/api'
-import { useQueryClient } from '@tanstack/react-query'
 
 function Stat({ value, label }: { value: number | string; label: string }) {
   return (
@@ -70,9 +68,7 @@ export function ProfilePage() {
   const wishlist = useWishlist()
   const { signOut } = useAuth()
   const navigate = useNavigate()
-  const qc = useQueryClient()
   const [signingOut, setSigningOut] = useState(false)
-  const [failing, setFailing] = useState(isFailureSimulated)
   // Placeholder preferences (not persisted).
   const [shareLogs, setShareLogs] = useState(true)
   const [weekly, setWeekly] = useState(false)
@@ -126,24 +122,6 @@ export function ProfilePage() {
             hint="Placeholder — email isn’t wired up yet."
             checked={weekly}
             onChange={setWeekly}
-          />
-        </div>
-      </section>
-
-      <section aria-labelledby="dev-heading" className="mt-8">
-        <h2 id="dev-heading" className="mb-2 text-2xl font-medium">
-          Developer
-        </h2>
-        <div className="rounded-[var(--radius-card)] border border-dashed border-ink/25 px-5">
-          <Toggle
-            label="Simulate API failure"
-            hint="Makes every data call fail, to test error states."
-            checked={failing}
-            onChange={(next) => {
-              setFailureSimulated(next)
-              setFailing(next)
-              void qc.invalidateQueries()
-            }}
           />
         </div>
       </section>

@@ -233,3 +233,26 @@ export function photo(kind: PlateKind, seed: string): string {
   cache.set(key, uri)
   return uri
 }
+
+/**
+ * Places seeded without photos get illustrated placeholders, keyed by the place id so they stay
+ * stable. Real photo URLs (from Supabase Storage) win whenever they exist.
+ */
+export function placeholderPhotosFor(place: {
+  id: string
+  kind: 'restaurant' | 'cafe'
+  specialty: string
+}): { cover: string; gallery: string[] } {
+  const kinds: PlateKind[] =
+    place.kind === 'cafe' ? ['cup', 'space'] : ['bowl', 'plate', 'steamer']
+  const hero = kinds[hash(place.id) % kinds.length]!
+  const cover = photo(hero, place.id)
+  return {
+    cover,
+    gallery: [
+      cover,
+      photo(hero === 'space' ? 'plate' : 'space', `${place.id}-b`),
+      photo('plate', `${place.id}-c`),
+    ],
+  }
+}

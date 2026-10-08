@@ -2,64 +2,68 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { signInWithEmail, signOut as apiSignOut } from '@/lib/api'
+import {
+  getSessionUserId,
+  onAuthChange,
+  signInWithPassword,
+  signOut as apiSignOut,
+  signUpWithEmail,
+  type SignUpInput,
+} from '@/lib/api'
 
-/**
- * UI-only auth state. There is no real authentication: "signed in" is a flag in localStorage.
- * When Supabase Auth arrives, this context can wrap its session instead.
- */
-const STORAGE_KEY = 'rj:signed-in'
+type Status = 'loading' | 'signedOut' | 'signedIn'
 
 interface AuthState {
+  status: Status
   signedIn: boolean
-  signIn: (email: string) => Promise<void>
+  signIn: (email: string, password: string) => Promise<void>
+  /** Resolves `needsConfirmation: true` when the project requires a confirmed email first. */
+  signUp: (input: SignUpInput) => Promise<{ needsConfirmation: boolean }>
   signOut: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthState | null>(null)
 
-function readFlag(): boolean {
-  try {
-    return localStorage.getItem(STORAGE_KEY) === '1'
-  } catch {
-    return false
-  }
-}
-
-function writeFlag(on: boolean) {
-  try {
-    if (on) localStorage.setItem(STORAGE_KEY, '1')
-    else localStorage.removeItem(STORAGE_KEY)
-  } catch {
-    /* storage unavailable — session lasts until reload */
-  }
-}
-
+/** Mirrors the Supabase session (via the API layer) into React state. */
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [signedIn, setSignedIn] = useState(readFlag)
+  const [status, setStatus] = useState<Status>('loading')
   const queryClient = useQueryClient()
+  const lastUser = useRef<string | null | undefined>(undefined)
 
-  const signIn = useCallback(async (email: string) => {
-    await signInWithEmail(email)
-    writeFlag(true)
-    setSignedIn(true)
-  }, [])
-
-  const signOut = useCallback(async () => {
-    await apiSignOut()
-    writeFlag(false)
-    setSignedIn(false)
-    queryClient.clear()
+  useEffect(() => {
+    const apply = (userId: string | null) => {
+      // A different person (or nobody) is signed in: never show the previous user's cached data.
+      if (lastUser.current !== undefined && lastUser.current !== userId)
+        queryClient.clear()
+      lastUser.current = userId
+      setStatus(userId ? 'signedIn' : 'signedOut')
+    }
+    void getSessionUserId()
+      .then(apply)
+      .catch(() => apply(null))
+    return onAuthChange(apply)
   }, [queryClient])
 
+  const signIn = useCallback(
+    (email: string, password: string) => signInWithPassword(email, password),
+    [],
+  )
+  const signUp = useCallback(async (input: SignUpInput) => {
+    const { needs_confirmation } = await signUpWithEmail(input)
+    return { needsConfirmation: needs_confirmation }
+  }, [])
+  const signOut = useCallback(() => apiSignOut(), [])
+
   const value = useMemo(
-    () => ({ signedIn, signIn, signOut }),
-    [signedIn, signIn, signOut],
+    () => ({ status, signedIn: status === 'signedIn', signIn, signUp, signOut }),
+    [status, signIn, signUp, signOut],
   )
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

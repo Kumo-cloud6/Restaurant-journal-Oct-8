@@ -27,20 +27,26 @@ export default defineConfig([
       '@typescript-eslint/consistent-type-imports': 'error',
     },
   },
-  // Architecture rule: mock data is private to the data access layer.
+  // Architecture rule: the Supabase client is private to the data access layer.
   // Components, hooks and pages must go through src/lib/api/ (via TanStack Query hooks).
   {
     files: ['src/**/*.{ts,tsx}'],
-    ignores: ['src/lib/api/**', 'src/mocks/**'],
+    ignores: ['src/lib/api/**'],
     rules: {
       'no-restricted-imports': [
         'error',
         {
+          paths: [
+            {
+              name: '@supabase/supabase-js',
+              message:
+                'Supabase is private to src/lib/api/. Add a function there and call it from a query hook.',
+            },
+          ],
           patterns: [
             {
-              group: ['@/mocks', '@/mocks/*', '**/mocks', '**/mocks/*'],
-              message:
-                'Mock data is private to src/lib/api/. Use a TanStack Query hook that calls the API layer.',
+              group: ['@/lib/api/*', '**/lib/api/*'],
+              message: 'Import from "@/lib/api" (the index) — not from files inside it.',
             },
           ],
         },
