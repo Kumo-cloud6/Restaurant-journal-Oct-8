@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 
 export function PageHeader({
   eyebrow,
@@ -11,6 +11,10 @@ export function PageHeader({
   description?: string
   action?: ReactNode
 }) {
+  useEffect(() => {
+    document.title = `${title} · Restaurant Journal`
+  }, [title])
+
   return (
     <header className="mb-6 flex items-end justify-between gap-4 md:mb-8">
       <div className="min-w-0">

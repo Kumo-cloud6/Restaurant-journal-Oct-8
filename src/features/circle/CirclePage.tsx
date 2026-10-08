@@ -64,15 +64,15 @@ export function CirclePage() {
                   </Button>
                 </div>
               ))}
-              <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                 {friends.map((f) => (
                   <li
                     key={f.user.id}
                     className="rounded-[var(--radius-card)] bg-cream p-4 shadow-[var(--shadow-card)]"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
                       <Avatar user={f.user} size="md" />
-                      <div className="min-w-0">
+                      <div className="max-w-full min-w-0">
                         <p className="truncate font-semibold">{f.user.display_name}</p>
                         <p className="truncate text-xs text-soy">@{f.user.handle}</p>
                       </div>
@@ -137,7 +137,10 @@ export function CirclePage() {
                       </span>
                     </p>
                     <h3 className="mt-1 text-xl font-medium">
-                      <Link to={`/places/${place.id}`} className="hover:underline">
+                      <Link
+                        to={`/places/${place.id}`}
+                        className="-my-2 inline-block py-2 hover:underline"
+                      >
                         {place.name}
                       </Link>
                     </h3>

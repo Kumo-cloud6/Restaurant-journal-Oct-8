@@ -63,7 +63,10 @@ export function WishlistView() {
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
                   <TrustBadge summary={summary} className="self-start" />
                   <h3 className="text-xl font-medium">
-                    <Link to={`/places/${place.id}`} className="hover:underline">
+                    <Link
+                      to={`/places/${place.id}`}
+                      className="-my-2 inline-block py-2 hover:underline"
+                    >
                       {place.name}
                     </Link>
                   </h3>

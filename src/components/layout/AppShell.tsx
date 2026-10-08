@@ -6,7 +6,7 @@ import { SideNav } from './SideNav'
 export function AppShell() {
   const { pathname } = useLocation()
 
-  // Reset scroll on navigation and move focus to the page so screen readers announce the change.
+  // Start each page at the top on navigation.
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [pathname])

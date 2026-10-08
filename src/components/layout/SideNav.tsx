@@ -37,7 +37,7 @@ export function SideNav() {
       </nav>
       <NavLink to="/add" className={buttonClass({ size: 'lg', fullWidth: true })}>
         <Icon name="plus" size={20} />
-        Add a meal or spot
+        Add to journal
       </NavLink>
     </aside>
   )

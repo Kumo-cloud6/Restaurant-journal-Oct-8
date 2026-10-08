@@ -153,7 +153,7 @@ const seeds: PlaceSeed[] = [
     lng: -71.0616,
     price: 1,
     description:
-      'A family-run counter with a handwritten menu. Nobody in the app has logged it yet. Be the first from your circle.',
+      'A family-run counter with a handwritten menu and a short line of regulars. No buzz online, just pho worth the trip.',
     hero: 'bowl',
     buzz: 0,
   },

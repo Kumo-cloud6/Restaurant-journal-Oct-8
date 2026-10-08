@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -31,6 +32,7 @@ function groupByMonth(entries: JournalEntry[]) {
 }
 
 function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
+  if (!children || (Array.isArray(children) && children.length === 0)) return null
   return (
     <div role="group" aria-label={label} className="flex items-center gap-3">
       <span className="label-caps hidden w-24 shrink-0 text-soy md:block">{label}</span>
@@ -43,6 +45,7 @@ function FilterRow({ label, children }: { label: string; children: React.ReactNo
 
 export function JournalPage() {
   const [params, setParams] = useSearchParams()
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const tab: TabKey = params.get('tab') === 'wishlist' ? 'wishlist' : 'timeline'
   const filters: JournalFilters = {
     cuisine: params.get('cuisine') ?? undefined,
@@ -74,9 +77,11 @@ export function JournalPage() {
         eyebrow="My Journal"
         title="Every meal, remembered"
         action={
-          <ButtonLink to="/add?mode=log" icon="camera" className="hidden md:inline-flex">
-            Log a meal
-          </ButtonLink>
+          <div className="hidden md:block">
+            <ButtonLink to="/add?mode=log" icon="camera">
+              Log a meal
+            </ButtonLink>
+          </div>
         }
       />
 
@@ -102,7 +107,27 @@ export function JournalPage() {
           id={panelId('journal', 'timeline')}
           aria-labelledby={tabId('journal', 'timeline')}
         >
-          <div className="mb-6 space-y-3">
+          <button
+            type="button"
+            onClick={() => setFiltersOpen((o) => !o)}
+            aria-expanded={filtersOpen}
+            aria-controls="journal-filters"
+            className="mb-3 inline-flex min-h-11 items-center gap-2 rounded-full border border-ink/20 bg-cream px-4 text-sm font-medium md:hidden"
+          >
+            Filters
+            {hasFilters && (
+              <span className="rounded-full bg-persimmon px-2 text-xs font-semibold text-cream">
+                {
+                  [filters.cuisine, filters.tag_id, filters.companion_id].filter(Boolean)
+                    .length
+                }
+              </span>
+            )}
+          </button>
+          <div
+            id="journal-filters"
+            className={`mb-6 space-y-3 md:block ${filtersOpen ? 'block' : 'hidden'}`}
+          >
             <FilterRow label="Cuisine">
               {cuisines.data?.map((c) => (
                 <Chip

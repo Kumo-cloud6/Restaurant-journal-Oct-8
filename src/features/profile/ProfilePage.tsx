@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { PageHeader } from '@/components/layout/PageHeader'
@@ -33,10 +33,11 @@ function Toggle({
   checked: boolean
   onChange: (next: boolean) => void
 }) {
+  const labelId = useId()
   return (
     <div className="flex min-h-14 items-center justify-between gap-4 py-2">
       <div>
-        <p className="font-medium" id={`${label}-label`}>
+        <p className="font-medium" id={labelId}>
           {label}
         </p>
         <p className="text-sm text-soy">{hint}</p>
@@ -45,13 +46,18 @@ function Toggle({
         type="button"
         role="switch"
         aria-checked={checked}
-        aria-labelledby={`${label}-label`}
+        aria-labelledby={labelId}
         onClick={() => onChange(!checked)}
-        className={`relative h-8 w-14 shrink-0 rounded-full transition ${checked ? 'bg-matcha' : 'bg-ink/25'}`}
+        className="grid h-11 w-16 shrink-0 place-items-center rounded-full"
       >
         <span
-          className={`absolute top-1 left-1 size-6 rounded-full bg-cream shadow transition-transform ${checked ? 'translate-x-6' : ''}`}
-        />
+          aria-hidden
+          className={`relative block h-8 w-14 rounded-full transition ${checked ? 'bg-matcha' : 'bg-ink/25'}`}
+        >
+          <span
+            className={`absolute top-1 left-1 size-6 rounded-full bg-cream shadow transition-transform ${checked ? 'translate-x-6' : ''}`}
+          />
+        </span>
       </button>
     </div>
   )

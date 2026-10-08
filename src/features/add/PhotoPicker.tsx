@@ -33,7 +33,7 @@ export function PhotoPicker({
 
   return (
     <div>
-      <div className="flex gap-3 overflow-x-auto pb-1">
+      <div className="-mt-3 flex gap-3 overflow-x-auto pt-3 pr-3 pb-1">
         {photos.map((src, i) => (
           <div key={i} className="relative size-28 shrink-0 md:size-32">
             <img
@@ -52,7 +52,7 @@ export function PhotoPicker({
           </div>
         ))}
         {photos.length < 4 && (
-          <div className="relative">
+          <div className={photos.length === 0 ? 'relative flex-1' : 'relative'}>
             <input
               id={id}
               type="file"
@@ -64,9 +64,7 @@ export function PhotoPicker({
             <label
               htmlFor={id}
               className={`flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-persimmon/60 bg-blush/30 text-center text-sm font-medium text-persimmon-deep transition peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-persimmon hover:bg-blush/50 ${
-                photos.length === 0
-                  ? 'h-44 w-full min-w-64 md:h-52'
-                  : 'size-28 md:size-32'
+                photos.length === 0 ? 'h-44 w-full md:h-52' : 'size-28 md:size-32'
               }`}
             >
               <Icon name="camera" size={photos.length === 0 ? 34 : 26} />

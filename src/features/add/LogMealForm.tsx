@@ -125,7 +125,7 @@ export function LogMealForm() {
             <Chip
               key={f.user.id}
               selected={companions.includes(f.user.id)}
-              onToggle={() => setCompanions(toggle(companions, f.user.id))}
+              onToggle={() => setCompanions((cur) => toggle(cur, f.user.id))}
             >
               {f.user.display_name.split(' ')[0]}
             </Chip>
@@ -163,7 +163,10 @@ export function LogMealForm() {
           <ul className="flex flex-wrap gap-2" aria-label="Dishes you ate">
             {dishes.map((d) => (
               <li key={d}>
-                <Chip selected onToggle={() => setDishes(dishes.filter((x) => x !== d))}>
+                <Chip
+                  selected
+                  onToggle={() => setDishes((cur) => cur.filter((x) => x !== d))}
+                >
                   {d}
                   <Icon name="x" size={14} />
                   <span className="sr-only">Remove {d}</span>
@@ -182,7 +185,7 @@ export function LogMealForm() {
             <Chip
               key={t.id}
               selected={tagIds.includes(t.id)}
-              onToggle={() => setTagIds(toggle(tagIds, t.id))}
+              onToggle={() => setTagIds((cur) => toggle(cur, t.id))}
             >
               {t.label}
             </Chip>

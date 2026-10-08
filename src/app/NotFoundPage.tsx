@@ -5,6 +5,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 export function NotFoundPage() {
   return (
     <PageContainer width="narrow">
+      <h1 className="sr-only">Page not found</h1>
       <EmptyState
         icon="compass"
         title="This page wandered off"

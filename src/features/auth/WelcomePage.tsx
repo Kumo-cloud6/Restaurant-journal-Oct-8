@@ -28,9 +28,9 @@ function Collage() {
     >
       <div className="absolute -top-10 -left-10 size-56 rounded-full bg-persimmon md:size-96" />
       <div className="absolute top-24 right-6 h-48 w-32 rounded-t-full bg-miso md:top-1/3 md:right-16 md:h-80 md:w-52" />
-      <div className="absolute -bottom-8 left-1/3 size-40 rounded-full bg-blush md:size-72" />
+      <div className="absolute -bottom-8 left-[45%] size-40 rounded-full bg-blush md:size-72" />
       <div className="absolute right-1/4 bottom-6 size-14 rounded-full bg-paper md:bottom-24 md:size-24" />
-      <p className="absolute bottom-5 left-5 max-w-[14rem] font-display text-2xl leading-tight font-medium text-cream italic md:bottom-12 md:left-12 md:max-w-xs md:text-4xl">
+      <p className="absolute bottom-5 left-5 z-10 max-w-[10rem] font-display text-2xl leading-tight font-medium text-cream italic [text-shadow:0_1px_12px_rgb(43_33_24/0.45)] md:bottom-12 md:left-12 md:max-w-xs md:text-4xl">
         Trust the table, not the trend.
       </p>
     </div>

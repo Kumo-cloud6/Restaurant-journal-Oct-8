@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { PhotoImage } from '@/components/PhotoImage'
@@ -67,6 +68,10 @@ function PlaceDetailView({ detail }: { detail: PlaceDetail }) {
     }
   }
 
+  useEffect(() => {
+    document.title = `${place.name} · Restaurant Journal`
+  }, [place.name])
+
   const friendNames = friends_visited.map((f) => f.display_name.split(' ')[0]!)
 
   return (
@@ -130,7 +135,14 @@ function PlaceDetailView({ detail }: { detail: PlaceDetail }) {
             aria-pressed={on_wishlist}
             className="flex-1"
           >
-            {on_wishlist ? 'Saved' : 'Save to wishlist'}
+            {on_wishlist ? (
+              'Saved'
+            ) : (
+              <>
+                <span className="md:hidden">Save</span>
+                <span className="hidden md:inline">Save to wishlist</span>
+              </>
+            )}
           </Button>
         </div>
 
